@@ -73,7 +73,7 @@ passport.use(new GoogleStrategy({
   function(accessToken, refreshToken, profile, cb) {
 
     User.findOrCreate({ googleId: profile.id }, function (err, user) {
-      console.log("successfully found " + profile.id);
+      console.log("successfully found " + profile);
       return cb(err, user);
     });
   }
@@ -117,11 +117,14 @@ app.get("/submit", function(req, res) {
 });
 
 app.get("/secrets", function(req, res) {
-  if (req.isAuthenticated()) {
-    res.render("secrets");
-  } else {
-    res.redirect("/login");
-  }
+  User.find({"secret": {$ne: null}}, function(err, foundUsers){
+    if (err){
+      console.log(err);
+    } else if (foundUsers){
+      res.render("secrets", {usersWithSecrets: foundUsers});
+    }
+  });
+
 });
 
 app.post("/register", function(req, res) {
